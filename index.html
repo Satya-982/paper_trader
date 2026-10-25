@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="Practice stock trading with Rs. 1,00,000 of virtual money at real NSE prices.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Paper Trader">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Paper Trader</title>
+<style>
+:root{--bg:#0b1020;--card:#131a2e;--line:#243049;--tx:#e6ebf5;--mut:#8b97b3;--g:#22c55e;--r:#ef4444;--y:#f59e0b;--ac:#6366f1;--row:#0f1627}
+@media(prefers-color-scheme:light){:root{--bg:#f4f6fb;--card:#fff;--line:#dfe4ef;--tx:#0f172a;--mut:#5b6785;--row:#f7f9fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.hint{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
+h1{font-size:26px;margin:4px 0 2px}h2{font-size:16px;margin:0 0 10px}
+.sub{color:var(--mut);margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi .l{color:var(--mut);font-size:12px}.kpi .v{font-size:20px;font-weight:650;margin-top:2px}.kpi .d{font-size:12px;margin-top:2px}
+.g{color:var(--g)}.r{color:var(--r)}.m{color:var(--mut)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);font-weight:600;font-size:12px}
+th:first-child,td:first-child{text-align:left}
+tbody tr:nth-child(even){background:var(--row)}
+.scroll{overflow-x:auto}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--tx);padding:8px 14px;border-radius:9px;cursor:pointer;font:inherit}
+.tab.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.pane{display:none}.pane.on{display:block}
+label{display:block;color:var(--mut);font-size:12px;margin:10px 0 3px}
+input,select,textarea{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+textarea{min-height:90px;resize:vertical}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:9px;padding:9px 16px;font-weight:600}
+.btn.sec{background:transparent;border:1px solid var(--line);color:var(--tx)}
+.btn.red{background:var(--r)}.btn.green{background:var(--g);color:#06210f}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.seg{display:flex;gap:6px}.seg button{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--tx);padding:8px;border-radius:8px}
+.seg button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.BUY{background:#14532d;color:#fff}.WATCH{background:#854d0e;color:#fff}.AVOID{background:var(--line);color:var(--mut)}
+.warn{background:#7c2d1233;border:1px solid #c2410c;color:var(--tx);padding:8px 12px;border-radius:9px;margin:8px 0;font-size:13px}
+.err{background:#7f1d1d33;border-color:var(--r)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+details summary{cursor:pointer;font-weight:600;color:var(--mut)}
+#toast{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:9}
+#toast div{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--ac);padding:10px 14px;border-radius:9px;max-width:340px;box-shadow:0 6px 20px #0006}
+.foot{color:var(--mut);font-size:12px;margin:18px 0}
+svg text{fill:var(--mut);font-size:11px}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.kpi .v{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>🎮 Paper Trader</h1>
+  <div class="sub" id="status">Loading…</div></div>
+  <button class="btn" id="install" hidden>⬇️ Install app</button></div>
+  <div class="hint" id="iosHint" hidden>To install on iPhone: tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</div>
+  <div id="banner"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Open positions</h2>
+    <div class="scroll" id="positions"></div>
+    <div id="closeRow" style="display:none;gap:8px;margin-top:10px">
+      <select id="closePick" style="max-width:260px"></select>
+      <button class="btn sec" id="closeBtn">Sell all at market</button>
+    </div>
+    <div class="m" style="font-size:12px;margin-top:8px">Prices refresh every 30 s while this page is open (Yahoo data can lag a few minutes). P&amp;L is after buy charges, before sell charges. Stop-loss and target exits fire only while the market is open and this page is open.</div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-t="trade">💹 Trade</button>
+    <button class="tab" data-t="sig">🎯 Signals</button>
+    <button class="tab" data-t="jour">📒 Journal</button>
+    <button class="tab" data-t="perf">📊 Performance</button>
+    <button class="tab" data-t="set">⚙️ Settings</button>
+  </div>
+
+  <div class="pane on" id="p-trade"><div class="card"><div class="grid2">
+    <div>
+      <label>Stock (BUY signals first)</label><select id="stk"></select>
+      <label>…or type any NSE symbol</label><input id="custom" placeholder="e.g. IRCTC" autocapitalize="characters">
+      <label>Action</label>
+      <div class="seg" id="side"><button data-s="Buy" class="on">Buy</button><button data-s="Sell">Sell</button></div>
+      <div id="sigline" class="m" style="margin-top:8px;font-size:13px"></div>
+      <label>Quantity</label><input id="qty" type="number" min="1" step="1" value="1">
+      <div id="buyOnly">
+        <label>Stop-loss ₹ (0 = none)</label><input id="stop" type="number" min="0" step="0.5" value="0">
+        <label>Target ₹ (0 = none)</label><input id="tgt" type="number" min="0" step="0.5" value="0">
+      </div>
+    </div>
+    <div>
+      <div class="m">Live price</div>
+      <div style="font-size:28px;font-weight:650" id="lp">—</div>
+      <div class="m" id="lpt" style="font-size:12px"></div>
+      <div id="sum" style="margin:12px 0;line-height:1.8"></div>
+      <button class="btn" id="place" style="width:100%">Place order</button>
+    </div>
+  </div></div></div>
+
+  <div class="pane" id="p-sig"><div class="card">
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <h2 style="margin:0">Ranked signals</h2><button class="btn sec" id="updLive">Update live prices</button></div>
+    <div id="regime"></div><div class="scroll" id="sigtab"></div>
+    <div class="m" style="font-size:12px;margin-top:8px">Signals use daily closes (same rules as the Stock Market Advisor). Target and stop are price levels from that close. Qty is sized so a stop-out costs about your max-risk %.</div>
+  </div></div>
+
+  <div class="pane" id="p-jour"><div class="card"><div class="kpis" id="jk" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px"></div>
+    <div class="scroll" id="jtab"></div><div style="margin-top:10px"><button class="btn sec" id="csv">⬇️ Download journal (CSV)</button></div></div></div>
+
+  <div class="pane" id="p-perf"><div class="card"><div id="chart"></div><div class="kpis" id="pk" style="grid-template-columns:repeat(3,1fr);margin-top:10px"></div></div></div>
+
+  <div class="pane" id="p-set"><div class="card"><div class="grid2">
+    <div>
+      <label>Watchlist (NSE symbols, comma separated)</label><textarea id="wl"></textarea>
+      <label>Signal holding period</label>
+      <select id="hz"><option value="5">Short (5 trading days)</option><option value="20" selected>Swing (20 days)</option><option value="60">Positional (60 days)</option></select>
+      <label>Max risk per trade (% of account): <b id="rkv"></b></label><input id="rk" type="range" min="0.25" max="3" step="0.25">
+      <label>Max per stock (% of account): <b id="mpv"></b></label><input id="mp" type="range" min="5" max="50" step="5">
+      <label>Trading charges per order (%)</label><input id="fee" type="number" min="0" max="1" step="0.05">
+      <div style="margin-top:12px"><button class="btn" id="apply">Apply &amp; reload signals</button></div>
+    </div>
+    <div>
+      <h2>Account</h2>
+      <div class="m">Saved automatically in this browser (localStorage). Clearing site data or using a private window will erase it, so download a backup now and then.</div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn sec" id="bk">⬇️ Download backup</button>
+        <button class="btn sec" id="rs">Restore backup…</button><input id="rsf" type="file" accept=".json" hidden>
+      </div>
+      <label>Starting money (₹) for a new account</label><input id="newamt" type="number" min="100000" step="50000" value="100000">
+      <label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type="checkbox" id="sure" style="width:auto"> I understand this erases all my trades</label>
+      <div style="margin-top:8px"><button class="btn red" id="reset" disabled>Reset account</button></div>
+    </div>
+  </div></div></div>
+
+  <div class="foot">Practice tool only, not financial advice. Real markets add slippage, delays and emotions that paper trading can't fully copy. No real money is used. Prices from Yahoo Finance via public CORS proxies, so they can be delayed or occasionally unavailable.</div>
+</div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================ helpers */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = x => (typeof x === 'number' && isFinite(x));
+const inr = x => (x < 0 ? '-' : '') + '₹' + Math.round(Math.abs(x)).toLocaleString('en-IN');
+const px = x => '₹' + x.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const pct = (x, d = 2) => (x >= 0 ? '+' : '') + x.toFixed(d) + '%';
+const cls = x => x > 0 ? 'g' : x < 0 ? 'r' : '';
+const plain = s => s.replace(/\.NS$/, '');
+const normSym = s => { s = String(s).trim().toUpperCase().replace(/[^A-Z0-9&.\-^]/g, ''); return !s ? '' : (s[0] === '^' || s.endsWith('.NS')) ? s : s + '.NS'; };
+const BENCH = '^NSEI', START_CASH = 100000;
+const BUY_SCORE = 65, MIN_WIN = 55, MIN_SAMPLES = 15;
+const DEFAULT_WL = 'RELIANCE, TCS, HDFCBANK, INFY, ICICIBANK, BHARTIARTL, ITC, SBIN, LT, HINDUNILVR, KOTAKBANK, AXISBANK, BAJFINANCE, MARUTI, SUNPHARMA, TITAN, ASIANPAINT, ULTRACEMCO, NTPC, POWERGRID, TATASTEEL, M&M, ONGC, COALINDIA, ADANIPORTS, HCLTECH, WIPRO, TECHM, DRREDDY, CIPLA, EICHERMOT, BAJAJ-AUTO';
+
+const mem = {};
+const store = {
+  get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return mem[k] ? JSON.parse(mem[k]) : null; } },
+  set(k, v) { const s = JSON.stringify(v); try { localStorage.setItem(k, s); } catch (e) { mem[k] = s; } }
+};
+
+function istNow() { return new Date(Date.now() + 5.5 * 3600e3); }
+function marketOpen() {
+  const d = istNow(), wd = d.getUTCDay(), m = d.getUTCHours() * 60 + d.getUTCMinutes();
+  return wd >= 1 && wd <= 5 && m >= 555 && m <= 930;
+}
+function fmtTime(iso) { return new Date(iso).toLocaleString('en-IN', {timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}); }
+function toast(msg) { const d = document.createElement('div'); d.textContent = msg; $('#toast').appendChild(d); setTimeout(() => d.remove(), 5500); }
+
+/* ============================================================ data (Yahoo via CORS proxies) */
+const PROXIES = [
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  u => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u)
+];
+let pIdx = 0;
+const YURL = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+async function getChart(sym, qs) {
+  let err = new Error('no proxy worked');
+  for (let k = 0; k < PROXIES.length; k++) {
+    const i = (pIdx + k) % PROXIES.length;
+    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
+    try {
+      const r = await fetch(PROXIES[i](YURL + encodeURIComponent(sym) + '?' + qs), {signal: ctl.signal});
+      clearTimeout(to);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      if (!j.chart || !j.chart.result || !j.chart.result[0]) throw new Error('no data for ' + sym);
+      pIdx = i;
+      return j.chart.result[0];
+    } catch (e) { clearTimeout(to); err = e; }
+  }
+  throw err;
+}
+async function fetchHistory(sym) {
+  const r = await getChart(sym, 'range=5y&interval=1d');
+  const q = r.indicators.quote[0], out = {d: [], c: [], h: [], l: [], v: []};
+  (r.timestamp || []).forEach((t, i) => {
+    if (!num(q.close[i]) || !num(q.high[i]) || !num(q.low[i])) return;
+    out.d.push(new Date((t + 19800) * 1000).toISOString().slice(0, 10));
+    out.c.push(q.close[i]); out.h.push(q.high[i]); out.l.push(q.low[i]); out.v.push(num(q.volume[i]) ? q.volume[i] : 0);
+  });
+  if (out.c.length < 260) throw new Error('short history');
+  return out;
+}
+const quotes = {}; // sym -> {p, ts, at}
+async function fetchQuote(sym) {
+  const r = await getChart(sym, 'range=1d&interval=1d');
+  const p = r.meta.regularMarketPrice;
+  if (!num(p)) throw new Error('no price');
+  quotes[sym] = {p, ts: (r.meta.regularMarketTime || 0) * 1000, at: Date.now()};
+  return quotes[sym];
+}
+async function pool(items, limit, fn) {
+  let i = 0, done = 0;
+  const workers = Array.from({length: Math.min(limit, items.length)}, async () => {
+    while (i < items.length) { const it = items[i++]; try { await fn(it); } catch (e) {} done++; }
+  });
+  await Promise.all(workers);
+}
+
+/* ============================================================ signal engine (port of the Advisor rules) */
+function sma(a, n) { const o = new Array(a.length).fill(NaN); let s = 0; for (let i = 0; i < a.length; i++) { s += a[i]; if (i >= n) s -= a[i - n]; if (i >= n - 1) o[i] = s / n; } return o; }
+function ema(a, n) { const k = 2 / (n + 1), o = new Array(a.length).fill(NaN); let p = NaN; for (let i = 0; i < a.length; i++) { if (!isFinite(a[i])) continue; p = isNaN(p) ? a[i] : a[i] * k + p * (1 - k); o[i] = p; } return o; }
+function rsi(c, n = 14) { const o = new Array(c.length).fill(NaN), a = 1 / n; let up = NaN, dn = NaN; for (let i = 1; i < c.length; i++) { const d = c[i] - c[i - 1], u = Math.max(d, 0), w = Math.max(-d, 0); up = isNaN(up) ? u : u * a + up * (1 - a); dn = isNaN(dn) ? w : w * a + dn * (1 - a); o[i] = dn === 0 ? 100 : 100 - 100 / (1 + up / dn); } return o; }
+function median(a) { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+
+function analyse(h, bm) {
+  const n = h.c.length, c = h.c;
+  const s50 = sma(c, 50), s200 = sma(c, 200), r = rsi(c);
+  const e12 = ema(c, 12), e26 = ema(c, 26), macd = c.map((_, i) => e12[i] - e26[i]), sg = ema(macd, 9), hist = macd.map((m, i) => m - sg[i]);
+  const tr = c.map((_, i) => i === 0 ? h.h[i] - h.l[i] : Math.max(h.h[i] - h.l[i], Math.abs(h.h[i] - c[i - 1]), Math.abs(h.l[i] - c[i - 1])));
+  const atr = sma(tr, 14), vm = sma(h.v, 20);
+  let last = NaN; const b = h.d.map(d => { if (bm.has(d)) last = bm.get(d); return last; });
+  const score = new Array(n).fill(NaN);
+  for (let i = 0; i < n; i++) {
+    const rs = i >= 60 ? (c[i] / c[i - 60] - 1) - (b[i] / b[i - 60] - 1) : NaN;
+    const volx = vm[i] > 0 ? h.v[i] / vm[i] : NaN;
+    let s = 0;
+    if (c[i] > s200[i]) s += 15; if (c[i] > s50[i]) s += 10; if (s50[i] > s200[i]) s += 5;
+    if (r[i] >= 50 && r[i] <= 70) s += 20; else if (r[i] >= 40 && r[i] < 50) s += 8;
+    if (hist[i] > 0) s += 15; if (i >= 3 && hist[i] > hist[i - 3]) s += 10;
+    if (volx > 1.2) s += 10; if (rs > 0) s += 15;
+    score[i] = s;
+  }
+  return {c, score, s200, atr, n};
+}
+function backtest(a, N) {
+  const out = [];
+  for (let i = 0; i + N < a.n; i++) if (a.score[i] >= BUY_SCORE && isFinite(a.s200[i])) out.push((a.c[i + N] / a.c[i] - 1) * 100);
+  if (out.length < 5) return null;
+  return {n: out.length, win: out.filter(x => x > 0).length / out.length * 100, med: median(out)};
+}
+
+/* ============================================================ state */
+let S = Object.assign({wl: DEFAULT_WL, hz: 20, rk: 1, mp: 20, fee: 0.1}, store.get('pt_settings') || {});
+function newAccount(cash) { return {startCash: cash, cash, created: new Date().toISOString(), benchStart: null, positions: {}, journal: [], equity: []}; }
+function validAcct(a) { return a && num(a.cash) && num(a.startCash) && a.positions && Array.isArray(a.journal); }
+let A = store.get('pt_account'); if (!validAcct(A)) A = newAccount(START_CASH); A.equity = A.equity || [];
+const saveA = () => store.set('pt_account', A);
+const saveS = () => store.set('pt_settings', S);
+const feeRate = () => S.fee / 100;
+
+let signals = [], regimeUp = true, loadInfo = '', sigMap = {};
+let tradeSide = 'Buy';
+
+/* ============================================================ account ops */
+function doBuy(sym, qty, price, stop, target, note) {
+  qty = Math.floor(qty);
+  if (!(qty >= 1)) return [false, 'Quantity must be at least 1.'];
+  if (stop && stop >= price) return [false, `Stop-loss (${px(stop)}) must be below the buy price (${px(price)}).`];
+  if (target && target <= price) return [false, `Target (${px(target)}) must be above the buy price (${px(price)}).`];
+  const gross = price * qty, fee = gross * feeRate(), cost = gross + fee;
+  if (cost > A.cash + 1e-9) return [false, `Not enough cash. Need ${inr(cost)}, you have ${inr(A.cash)}.`];
+  let p = A.positions[sym];
+  if (p) { const tot = p.qty + qty; p.avg = (p.qty * p.avg + cost) / tot; p.qty = tot; }
+  else p = A.positions[sym] = {qty, avg: cost / qty, stop: null, target: null, opened: new Date().toISOString()};
+  if (stop > 0) p.stop = stop; if (target > 0) p.target = target;
+  A.cash -= cost;
+  A.journal.push({t: new Date().toISOString(), sym, side: 'BUY', qty, price: +price.toFixed(2), fee: +fee.toFixed(2), pnl: null, note});
+  saveA();
+  return [true, `Bought ${qty} ${plain(sym)} at ${px(price)} (charges ${px(fee)}).`];
+}
+function doSell(sym, qty, price, note) {
+  const p = A.positions[sym]; qty = Math.floor(qty);
+  if (!p) return [false, `You don't hold ${plain(sym)}.`];
+  if (!(qty >= 1) || qty > p.qty) return [false, `You can sell 1 to ${p.qty} shares of ${plain(sym)}.`];
+  const gross = price * qty, fee = gross * feeRate(), net = gross - fee, pnl = net - qty * p.avg;
+  A.cash += net; p.qty -= qty; if (p.qty === 0) delete A.positions[sym];
+  A.journal.push({t: new Date().toISOString(), sym, side: 'SELL', qty, price: +price.toFixed(2), fee: +fee.toFixed(2), pnl: +pnl.toFixed(2), note});
+  saveA();
+  return [true, `Sold ${qty} ${plain(sym)} at ${px(price)}. Realised P&L ${inr(pnl)}.`];
+}
+function checkExits(open) {
+  const ev = [];
+  if (!open) return ev;
+  for (const [sym, p] of Object.entries({...A.positions})) {
+    const q = quotes[sym]; if (!q) continue;
+    let note = null;
+    if (p.stop && q.p <= p.stop) note = 'Stop-loss hit';
+    else if (p.target && q.p >= p.target) note = 'Target hit';
+    if (!note) continue;
+    const [ok, msg] = doSell(sym, p.qty, q.p, note);
+    if (ok) ev.push(note + ': ' + msg);
+  }
+  return ev;
+}
+function valuation() {
+  let mkt = 0, cost = 0; const rows = [];
+  for (const [sym, p] of Object.entries(A.positions)) {
+    const q = quotes[sym], ltp = q ? q.p : p.avg, value = ltp * p.qty, basis = p.avg * p.qty;
+    mkt += value; cost += basis;
+    rows.push({sym, p, q, ltp, value, pnl: value - basis, pct: (value / basis - 1) * 100});
+  }
+  return {rows, mkt, cost};
+}
+const equityEstimate = () => A.cash + Object.values(A.positions).reduce((s, p) => s + p.qty * p.avg, 0);
+
+/* ============================================================ rendering */
+function renderStatus() {
+  const open = marketOpen(), d = istNow();
+  $('#status').innerHTML = `<span class="dot" style="background:${open ? 'var(--g)' : 'var(--r)'}"></span>NSE ${open ? 'Open' : 'Closed'} · ${d.toUTCString().slice(0, 11)} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')} IST · Practice with virtual money at real market prices. No real money involved.`;
+}
+function renderLive() {
+  const {rows, mkt, cost} = valuation(), equity = A.cash + mkt;
+  const ret = (equity / A.startCash - 1) * 100, nb = quotes[BENCH];
+  const nret = nb && A.benchStart ? (nb.p / A.benchStart - 1) * 100 : null;
+  const booked = A.journal.reduce((s, j) => s + (j.pnl || 0), 0);
+  const k = (l, v, d, c) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="d ${c || ''}">${d || '&nbsp;'}</div></div>`;
+  $('#kpis').innerHTML =
+    k('Account value', inr(equity), `${inr(equity - A.startCash)} (${pct(ret)})`, cls(equity - A.startCash)) +
+    k('Cash', inr(A.cash), '') +
+    k('Open P&L', inr(mkt - cost), cost ? pct((mkt / cost - 1) * 100) : '', cls(mkt - cost)) +
+    k('Booked P&L', inr(booked), '', cls(booked)) +
+    k('You vs Nifty', pct(ret), nret !== null ? `${pct(ret - nret)} vs Nifty (${pct(nret)})` : 'Nifty loading…', nret !== null ? cls(ret - nret) : 'm');
+  if (!rows.length) {
+    $('#positions').innerHTML = '<div class="m">No open positions yet. Open the <b>Signals</b> tab, pick a BUY, then place it in the <b>Trade</b> tab.</div>';
+    $('#closeRow').style.display = 'none';
+  } else {
+    $('#positions').innerHTML = `<table><thead><tr><th>Stock</th><th>Qty</th><th>Avg ₹</th><th>LTP ₹</th><th>Value ₹</th><th>P&amp;L ₹</th><th>P&amp;L %</th><th>Stop ₹</th><th>Target ₹</th><th>Price time</th></tr></thead><tbody>` +
+      rows.map(r => `<tr><td><b>${esc(plain(r.sym))}</b></td><td>${r.p.qty}</td><td>${r.p.avg.toFixed(2)}</td><td>${r.q ? r.ltp.toFixed(2) : '—'}</td><td>${Math.round(r.value).toLocaleString('en-IN')}</td><td class="${cls(r.pnl)}">${Math.round(r.pnl).toLocaleString('en-IN')}</td><td class="${cls(r.pct)}">${r.pct.toFixed(2)}</td><td>${r.p.stop ? r.p.stop.toFixed(2) : '—'}</td><td>${r.p.target ? r.p.target.toFixed(2) : '—'}</td><td class="m">${r.q ? fmtTime(r.q.ts || r.q.at) : 'unavailable'}</td></tr>`).join('') + '</tbody></table>';
+    const sel = $('#closePick'), cur = sel.value;
+    sel.innerHTML = rows.map(r => `<option value="${esc(r.sym)}">${esc(plain(r.sym))}</option>`).join('');
+    if (cur && A.positions[cur]) sel.value = cur;
+    $('#closeRow').style.display = 'flex';
+  }
+  const below = rows.filter(r => !marketOpen() && r.q && r.p.stop && r.q.p <= r.p.stop).map(r => plain(r.sym));
+  $('#banner').innerHTML = below.length ? `<div class="warn">${esc(below.join(', '))} closed below its stop. It will be sold when the market is open and this page is open.</div>` : '';
+}
+function renderSignals() {
+  $('#regime').innerHTML = regimeUp ? '' : '<div class="warn">Nifty is below its 200-day average, so scores are reduced. Trade smaller.</div>';
+  if (!signals.length) { $('#sigtab').innerHTML = `<div class="m">${esc(loadInfo || 'Loading signals…')}</div>`; return; }
+  $('#sigtab').innerHTML = `<table><thead><tr><th>Stock</th><th>Close ₹</th><th>Live ₹</th><th>Move %</th><th>Score</th><th>Signal</th><th>Exp %</th><th>Win %</th><th>Samples</th><th>Target ₹</th><th>Stop ₹</th><th>Qty</th></tr></thead><tbody>` +
+    signals.map(s => { const q = quotes[s.sym], mv = q ? (q.p / s.close - 1) * 100 : null;
+      return `<tr><td><b>${esc(s.name)}</b></td><td>${s.close.toFixed(2)}</td><td>${q ? q.p.toFixed(2) : '—'}</td><td class="${mv === null ? '' : cls(mv)}">${mv === null ? '—' : mv.toFixed(2)}</td><td>${s.score}</td><td><span class="pill ${s.signal}">${s.signal}</span></td><td>${s.exp === null ? '—' : s.exp.toFixed(1)}</td><td>${s.win === null ? '—' : Math.round(s.win)}</td><td>${s.samples}</td><td>${s.target ? s.target.toFixed(2) : '—'}</td><td>${s.stop.toFixed(2)}</td><td>${s.qty}</td></tr>`; }).join('') + '</tbody></table>' +
+    (loadInfo ? `<div class="m" style="font-size:12px;margin-top:6px">${esc(loadInfo)}</div>` : '');
+}
+function renderStockList() {
+  const sel = $('#stk'), cur = sel.value;
+  sel.innerHTML = signals.length
+    ? signals.map(s => `<option value="${esc(s.name)}">${esc(s.name)} • ${s.signal} (${s.score})</option>`).join('')
+    : normList().map(t => `<option value="${esc(plain(t))}">${esc(plain(t))}</option>`).join('');
+  if (cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+}
+function renderJournal() {
+  const J = A.journal, sells = J.filter(j => j.side === 'SELL'), wins = sells.filter(j => j.pnl > 0), loss = sells.filter(j => j.pnl <= 0);
+  const avg = a => a.length ? a.reduce((s, j) => s + j.pnl, 0) / a.length : null;
+  const k = (l, v) => `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:17px">${v}</div></div>`;
+  $('#jk').innerHTML = k('Closed trades', sells.length) + k('Win rate', sells.length ? Math.round(wins.length / sells.length * 100) + '%' : 'n/a') +
+    k('Avg win / loss', `${avg(wins) === null ? '-' : inr(avg(wins))} / ${avg(loss) === null ? '-' : inr(avg(loss))}`) + k('Charges paid', inr(J.reduce((s, j) => s + j.fee, 0)));
+  $('#jtab').innerHTML = J.length ? `<table><thead><tr><th>Time</th><th>Stock</th><th>Side</th><th>Qty</th><th>Price ₹</th><th>Charges ₹</th><th>P&amp;L ₹</th><th>Note</th></tr></thead><tbody>` +
+    [...J].reverse().map(j => `<tr><td>${fmtTime(j.t)}</td><td><b>${esc(plain(j.sym))}</b></td><td>${j.side}</td><td>${j.qty}</td><td>${j.price}</td><td>${j.fee}</td><td class="${j.pnl === null ? '' : cls(j.pnl)}">${j.pnl === null ? '—' : j.pnl}</td><td class="m">${esc(j.note)}</td></tr>`).join('') + '</tbody></table>' : '<div class="m">Your trades will appear here.</div>';
+}
+function renderPerf() {
+  const eq = A.equity;
+  if (eq.length < 2) { $('#chart').innerHTML = '<div class="m">Your equity curve builds up as you keep the page open during market hours.</div>'; $('#pk').innerHTML = ''; return; }
+  const W = 900, H = 320, P = 38, t0 = new Date(eq[0].t).getTime(), t1 = new Date(eq[eq.length - 1].t).getTime() || t0 + 1;
+  const mine = eq.map(e => (e.v / A.startCash - 1) * 100), bench = eq.map(e => e.b && A.benchStart ? (e.b / A.benchStart - 1) * 100 : null);
+  const all = mine.concat(bench.filter(x => x !== null), [0]); let lo = Math.min(...all), hi = Math.max(...all); if (hi - lo < 0.2) { hi += 0.1; lo -= 0.1; }
+  const X = t => P + (t1 === t0 ? 0 : (t - t0) / (t1 - t0)) * (W - P - 10), Y = v => H - 24 - (v - lo) / (hi - lo) * (H - 40);
+  const path = arr => arr.map((v, i) => v === null ? '' : (arr.slice(0, i).some(x => x !== null) ? 'L' : 'M') + X(new Date(eq[i].t).getTime()).toFixed(1) + ',' + Y(v).toFixed(1)).join('');
+  $('#chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Return since start"><line x1="${P}" x2="${W - 10}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line)" stroke-dasharray="4 4"/>` +
+    `<text x="4" y="${Y(hi) + 10}">${hi.toFixed(1)}%</text><text x="4" y="${Y(lo)}">${lo.toFixed(1)}%</text><text x="4" y="${Y(0) + 4}">0%</text>` +
+    `<path d="${path(bench)}" fill="none" stroke="var(--mut)" stroke-width="1.5" stroke-dasharray="4 3"/><path d="${path(mine)}" fill="none" stroke="var(--ac)" stroke-width="2.5"/>` +
+    `<text x="${P}" y="14" style="fill:var(--ac)">— Your account</text><text x="${P + 110}" y="14">- - Nifty 50</text></svg>`;
+  let peak = 0, dd = 0; eq.forEach(e => { peak = Math.max(peak, e.v); dd = Math.min(dd, (e.v / peak - 1) * 100); });
+  const k = (l, v) => `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:17px">${v}</div></div>`;
+  $('#pk').innerHTML = k('Peak value', inr(Math.max(...eq.map(e => e.v)))) + k('Max drawdown', dd.toFixed(1) + '%') + k('Started', new Date(A.created).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}));
+}
+function renderAll() { renderStatus(); renderLive(); renderSignals(); renderJournal(); renderPerf(); }
+
+/* ============================================================ trade tab */
+let tradeQuote = null;
+function curSym() { const c = normSym($('#custom').value); return c || normSym($('#stk').value); }
+async function loadTrade(prefill) {
+  const sym = curSym(); if (!sym) return;
+  const s = sigMap[plain(sym)], held = A.positions[sym];
+  $('#buyOnly').style.display = tradeSide === 'Buy' ? '' : 'none';
+  $('#sigline').innerHTML = s ? `Signal: <b>${s.signal}</b> · score ${s.score}/100` + (s.exp !== null ? ` · past ${S.hz}-day median ${pct(s.exp, 1)}, win rate ${Math.round(s.win)}% (${s.samples} samples)` : '') : '';
+  if (prefill) {
+    if (tradeSide === 'Buy') { $('#qty').value = Math.max(1, s ? s.qty : 1); $('#stop').value = s ? s.stop.toFixed(2) : 0; $('#tgt').value = s && s.target ? s.target.toFixed(2) : 0; }
+    else $('#qty').value = held ? held.qty : 0;
+  }
+  $('#lp').textContent = '…'; $('#lpt').textContent = '';
+  try { tradeQuote = {sym, ...(await fetchQuote(sym))}; } catch (e) { tradeQuote = null; }
+  if (curSym() !== sym) return;
+  summary();
+}
+function summary() {
+  const sym = curSym(), q = tradeQuote && tradeQuote.sym === sym ? tradeQuote : null;
+  $('#place').disabled = !q;
+  if (!q) { $('#lp').textContent = '—'; $('#lpt').textContent = ''; $('#sum').innerHTML = sym ? '<div class="warn err">No live price found for this symbol. Check the spelling or try again in a minute.</div>' : ''; return; }
+  const price = q.p, qty = Math.floor(+$('#qty').value) || 0, fee = price * qty * feeRate(), est = equityEstimate();
+  $('#lp').textContent = px(price); $('#lpt').textContent = 'as of ' + fmtTime(q.ts || q.at);
+  $('#place').textContent = tradeSide === 'Buy' ? 'Place BUY order' : 'Place SELL order';
+  $('#place').className = 'btn ' + (tradeSide === 'Buy' ? 'green' : 'red');
+  let h = marketOpen() ? '' : '<div class="warn">Market is closed. Orders fill at the last available price (practice only).</div>';
+  if (tradeSide === 'Buy') {
+    const gross = price * qty, stop = +$('#stop').value || 0;
+    h += `<b>Order value:</b> ${inr(gross)}<br><b>Charges:</b> ${px(fee)}<br><b>Cash after:</b> ${inr(A.cash - gross - fee)}<br><b>Share of account:</b> ${(gross / Math.max(est, 1) * 100).toFixed(0)}%`;
+    if (stop > 0 && stop < price) h += `<br><b>Loss if stop hits:</b> ${inr(qty * (price - stop))} (${(qty * (price - stop) / Math.max(est, 1) * 100).toFixed(1)}% of account)`;
+    else h += '<div class="warn">No valid stop-loss set. Practise the habit: always set one.</div>';
+    if (gross / Math.max(est, 1) * 100 > S.mp) h += `<div class="warn">This is above your ${S.mp}% per-stock limit.</div>`;
+  } else {
+    const held = A.positions[sym];
+    if (!held) h += `<div class="warn">You don't hold ${esc(plain(sym))}, so there's nothing to sell.</div>`;
+    else h += `<b>Proceeds:</b> ${inr(price * qty - fee)} (charges ${px(fee)})<br><b>Your average cost:</b> ${px(held.avg)}<br><b>P&amp;L on this sale:</b> <span class="${cls(price * qty - fee - qty * held.avg)}">${inr(price * qty - fee - qty * held.avg)}</span>`;
+  }
+  $('#sum').innerHTML = h;
+}
+async function placeOrder() {
+  const sym = curSym(); if (!sym) return;
+  let q; try { q = await fetchQuote(sym); } catch (e) { return toast('Could not get a live price. Try again.'); }
+  const qty = +$('#qty').value; let r;
+  if (tradeSide === 'Buy') { const s = sigMap[plain(sym)]; r = doBuy(sym, qty, q.p, +$('#stop').value || 0, +$('#tgt').value || 0, s ? 'Signal ' + s.signal : 'Manual buy'); }
+  else r = doSell(sym, qty, q.p, 'Manual sell');
+  toast((r[0] ? '✅ ' : '⚠️ ') + r[1]);
+  if (r[0]) { tradeQuote = {sym, ...q}; renderAll(); loadTrade(true); } else summary();
+}
+
+/* ============================================================ loading signals */
+const normList = () => [...new Set(S.wl.split(/[,\n]/).map(normSym).filter(Boolean))];
+let loadToken = 0;
+async function loadSignals() {
+  const token = ++loadToken, list = normList();
+  signals = []; sigMap = {}; renderSignals(); renderStockList();
+  let ok = 0, tot = list.length + 1; const hist = {};
+  const prog = () => { loadInfo = `Loading market history… ${ok}/${tot}`; if (token === loadToken) renderSignals(); };
+  prog();
+  let bench; try { bench = await fetchHistory(BENCH); ok++; } catch (e) { bench = null; }
+  if (!bench) { loadInfo = 'Could not load market data right now (the free data proxies may be busy). Press "Apply & reload signals" in Settings to try again.'; renderSignals(); $('#banner').innerHTML = '<div class="warn err">Market data unavailable. You can still view your account; live prices and signals need data.</div>'; return; }
+  await pool(list, 6, async t => { hist[t] = await fetchHistory(t); ok++; prog(); });
+  if (token !== loadToken) return;
+  const bm = new Map(bench.d.map((d, i) => [d, bench.c[i]])), bs = sma(bench.c, 200);
+  regimeUp = bench.c[bench.c.length - 1] > bs[bs.length - 1];
+  const est = equityEstimate(), N = +S.hz, rows = [];
+  for (const [t, h] of Object.entries(hist)) {
+    const a = analyse(h, bm), i = a.n - 1;
+    if (!isFinite(a.s200[i]) || !isFinite(a.atr[i])) continue;
+    const bt = backtest(a, N), score = a.score[i] - (regimeUp ? 0 : 10), price = a.c[i];
+    const signal = bt && score >= BUY_SCORE && bt.win >= MIN_WIN && bt.med > 0 && bt.n >= MIN_SAMPLES ? 'BUY' : score >= 50 ? 'WATCH' : 'AVOID';
+    const stop = price - 2 * a.atr[i], rps = price - stop;
+    const qty = Math.max(0, Math.floor(Math.min(est * S.rk / 100 / rps, est * S.mp / 100 / price)));
+    rows.push({sym: t, name: plain(t), close: price, score: Math.round(score), signal, exp: bt ? bt.med : null, win: bt ? bt.win : null, samples: bt ? bt.n : 0, target: bt ? price * (1 + bt.med / 100) : null, stop, qty});
+  }
+  const ord = {BUY: 0, WATCH: 1, AVOID: 2};
+  rows.sort((a, b) => ord[a.signal] - ord[b.signal] || (b.exp ?? -1e9) - (a.exp ?? -1e9));
+  signals = rows; rows.forEach(r => sigMap[r.name] = r);
+  const failed = list.length - rows.length;
+  loadInfo = failed > 0 ? `${failed} symbol(s) could not be loaded (bad spelling or data unavailable).` : '';
+  renderSignals(); renderStockList(); loadTrade(true);
+  updateLive(rows.filter(r => r.signal !== 'AVOID').map(r => r.sym));
+}
+async function updateLive(syms) {
+  await pool(syms || signals.map(s => s.sym), 6, fetchQuote);
+  renderSignals(); renderLive();
+}
+
+/* ============================================================ 30-second tick */
+let ticking = false;
+async function tick() {
+  if (ticking) return; ticking = true;
+  try {
+    const syms = [...Object.keys(A.positions), BENCH];
+    await pool(syms, 4, fetchQuote);
+    if (!A.benchStart && quotes[BENCH]) { A.benchStart = quotes[BENCH].p; saveA(); }
+    checkExits(marketOpen()).forEach(e => toast('🔔 ' + e));
+    const eq = A.cash + valuation().mkt, last = A.equity[A.equity.length - 1], b = quotes[BENCH] ? quotes[BENCH].p : null;
+    if (!last || ((Date.now() - new Date(last.t).getTime() >= 60000) && (marketOpen() || Math.abs(eq - last.v) > 0.5))) {
+      A.equity.push({t: new Date().toISOString(), v: +eq.toFixed(2), b}); if (A.equity.length > 3000) A.equity.splice(0, A.equity.length - 3000); saveA();
+    }
+    if (tradeQuote && quotes[tradeQuote.sym]) tradeQuote = {sym: tradeQuote.sym, ...quotes[tradeQuote.sym]};
+  } catch (e) {}
+  ticking = false; renderStatus(); renderLive(); renderPerf(); renderJournal(); summary();
+}
+
+/* ============================================================ events */
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'p-' + b.dataset.t));
+});
+document.querySelectorAll('#side button').forEach(b => b.onclick = () => {
+  tradeSide = b.dataset.s; document.querySelectorAll('#side button').forEach(x => x.classList.toggle('on', x === b)); loadTrade(true);
+});
+$('#stk').onchange = () => { $('#custom').value = ''; loadTrade(true); };
+$('#custom').onchange = () => loadTrade(true);
+['qty', 'stop', 'tgt'].forEach(id => $('#' + id).oninput = summary);
+$('#place').onclick = placeOrder;
+$('#closeBtn').onclick = async () => {
+  const sym = $('#closePick').value, p = A.positions[sym]; if (!p) return;
+  try { const q = await fetchQuote(sym); const r = doSell(sym, p.qty, q.p, 'Manual close'); toast((r[0] ? '✅ ' : '⚠️ ') + r[1]); renderAll(); } catch (e) { toast('No price available right now.'); }
+};
+$('#updLive').onclick = () => { toast('Updating live prices…'); updateLive(); };
+$('#rk').oninput = () => $('#rkv').textContent = (+$('#rk').value).toFixed(2) + '%';
+$('#mp').oninput = () => $('#mpv').textContent = $('#mp').value + '%';
+$('#apply').onclick = () => {
+  S = {wl: $('#wl').value, hz: +$('#hz').value, rk: +$('#rk').value, mp: +$('#mp').value, fee: Math.min(1, Math.max(0, +$('#fee').value || 0))}; saveS(); loadSignals(); toast('Settings applied. Reloading signals…');
+};
+$('#sure').onchange = () => $('#reset').disabled = !$('#sure').checked;
+$('#reset').onclick = () => { A = newAccount(Math.max(100000, +$('#newamt').value || START_CASH)); saveA(); $('#sure').checked = false; $('#reset').disabled = true; renderAll(); tick(); loadTrade(true); toast('Account reset.'); };
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+$('#bk').onclick = () => download('paper_account.json', JSON.stringify(A), 'application/json');
+$('#rs').onclick = () => $('#rsf').click();
+$('#rsf').onchange = async e => {
+  try { const b = JSON.parse(await e.target.files[0].text()); if (!validAcct(b)) throw 0; b.equity = b.equity || []; A = b; saveA(); renderAll(); tick(); toast('Backup restored.'); } catch (x) { toast('That file is not a valid Paper Trader backup.'); }
+  e.target.value = '';
+};
+$('#csv').onclick = () => {
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  download('trade_journal.csv', 'Time,Stock,Side,Qty,Price,Charges,PnL,Note\n' + A.journal.map(j => [j.t, plain(j.sym), j.side, j.qty, j.price, j.fee, j.pnl, j.note].map(q).join(',')).join('\n'), 'text/csv');
+};
+
+/* ============================================================ start */
+$('#wl').value = S.wl; $('#hz').value = String(S.hz); $('#rk').value = S.rk; $('#mp').value = S.mp; $('#fee').value = S.fee;
+$('#rkv').textContent = (+S.rk).toFixed(2) + '%'; $('#mpv').textContent = S.mp + '%';
+/* ---- installable app (PWA) ---- */
+let deferredInstall = null;
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (!standalone) $('#install').hidden = false; });
+window.addEventListener('appinstalled', () => { $('#install').hidden = true; deferredInstall = null; toast('Installed. Open Paper Trader from your home screen or app list.'); });
+$('#install').onclick = async () => { if (!deferredInstall) return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; $('#install').hidden = true; };
+if (!standalone && /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios|fxios/i.test(navigator.userAgent)) $('#iosHint').hidden = false;
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+renderStockList(); renderAll(); tick(); loadSignals();
+setInterval(tick, 30000); setInterval(renderStatus, 30000);
+</script>
+</body>
+</html>
